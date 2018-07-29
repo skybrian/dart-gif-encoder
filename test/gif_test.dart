@@ -8,14 +8,8 @@ void main() {
   // Also see: http://en.wikipedia.org/wiki/File:Quilt_design_as_46x46_uncompressed_GIF.gif
   const headerBlock = const [0x47, 0x49, 0x46, 0x38, 0x39, 0x61]; // GIF 89a
   const oneByOneTwoColor = const [
-    0x1,
-    0,
-    0x1,
-    0,
-    0xF0,
-    0,
-    0
-  ]; // 1x1, 2 colors, background index 0
+    0x1, 0, 0x1, 0, 0xF0, 0, 0 // 1x1, 2 colors, background index 0
+  ];
   const blackBlack = const [0, 0, 0, 0, 0, 0]; // 3 bytes per color
   const startOneByOneImage = const [0x2c, 0, 0, 0, 0, 1, 0, 1, 0, 0];
   const startData2 = const [0x02]; // two bit pixels, indexes are 0-3.
@@ -41,14 +35,8 @@ void main() {
   });
 
   const oneByTwoTwoColor = const [
-    0x1,
-    0,
-    0x2,
-    0,
-    0xF0,
-    0,
-    0
-  ]; // 1x2, 2 colors, background index 0
+    0x1, 0, 0x2, 0, 0xF0, 0, 0 // 1x2, 2 colors, background index 0
+  ];
   const startOneByTwoImage = const [0x2c, 0, 0, 0, 0, 1, 0, 2, 0, 0];
 
   test('two black pixels', () {
@@ -67,14 +55,8 @@ void main() {
   });
 
   const oneByThreeTwoColor = const [
-    0x1,
-    0,
-    0x3,
-    0,
-    0xF0,
-    0,
-    0
-  ]; // 1x3, 2 colors, background index 0
+    0x1, 0, 0x3, 0, 0xF0, 0, 0 // 1x3, 2 colors, background index 0
+  ];
   const startOneByThreeImage = const [0x2c, 0, 0, 0, 0, 1, 0, 3, 0, 0];
 
   test('three black pixels', () {
@@ -93,14 +75,8 @@ void main() {
   });
 
   const oneByFourTwoColor = const [
-    0x1,
-    0,
-    0x4,
-    0,
-    0xF0,
-    0,
-    0
-  ]; // 1x4, 2 colors, background index 0
+    0x1, 0, 0x4, 0, 0xF0, 0, 0 // 1x4, 2 colors, background index 0
+  ];
   const startOneByFourImage = const [0x2c, 0, 0, 0, 0, 1, 0, 4, 0, 0];
 
   test('four black pixels', () {
@@ -120,47 +96,13 @@ void main() {
   });
 
   const oneBySevenTwoColor = const [
-    0x1,
-    0,
-    0x7,
-    0,
-    0xF0,
-    0,
-    0
-  ]; // 1x7, 2 colors, background index 0
+    0x1, 0, 0x7, 0, 0xF0, 0, 0 // 1x7, 2 colors, background index 0
+  ];
   const startOneBySevenImage = const [0x2c, 0, 0, 0, 0, 1, 0, 7, 0, 0];
 
   test('seven black pixels', () {
-    final List<int> bytes = gif.makeGif(1, 7, [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ]);
+    final List<int> bytes =
+        gif.makeGif(1, 7, new List<int>.generate(28, (_) => 0));
 
     // bumps to 4-bit codes at the last pixel
     final expected = <int>[]
@@ -176,29 +118,12 @@ void main() {
   });
 
   const threeByOneFourColor = const [
-    0x3,
-    0,
-    0x1,
-    0,
-    0xF1,
-    0,
-    0
-  ]; // 1x2, 4 colors, background index 0
+    0x3, 0, 0x1, 0, 0xF1, 0, 0 // 1x2, 4 colors, background index 0
+  ];
   const startThreeByOneImage = const [0x2c, 0, 0, 0, 0, 3, 0, 1, 0, 0];
   const redGreenBlueBlack = const [
-    0xff,
-    0,
-    0,
-    0,
-    0xff,
-    0,
-    0,
-    0,
-    0xff,
-    0,
-    0,
-    0
-  ]; // 3 bytes per color
+    0xff, 0, 0, 0, 0xff, 0, 0, 0, 0xff, 0, 0, 0 // 3 bytes per color
+  ];
 
   test('rgb', () {
     final List<int> bytes =
