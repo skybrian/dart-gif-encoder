@@ -1,21 +1,18 @@
 library lzw;
 
-/**
- * Compresses pixels using LZW.
- */
+/// Compresses pixels using LZW.
 List<int> compress(List<int> pixels, int colorBits) {
-  var book = new CodeBook(colorBits);
-  var buf = new CodeBuffer(book);
-  
-  buf.add(book.clearCode);
+  final book = new CodeBook(colorBits);
+  final buf = new CodeBuffer(book)..add(book.clearCode);
+
   if (pixels.isEmpty) {
     buf.add(book.endCode);
-    return buf.finish();    
+    return buf.finish();
   }
-  
+
   int code = pixels[0];
   for (int px in pixels.sublist(1)) {
-    int newCode = book.codeAfterAppend(code, px);
+    final int newCode = book.codeAfterAppend(code, px);
     if (newCode == null) {
       buf.add(code);
       book.define(code, px);
@@ -24,26 +21,25 @@ List<int> compress(List<int> pixels, int colorBits) {
       code = newCode;
     }
   }
-  buf.add(code);    
-  buf.add(book.endCode);
+  buf..add(code)..add(book.endCode);
   return buf.finish();
 }
 
-// The highest code that can be defined in the CodeBook.
-const maxCode = (1 << 12) - 1;
+/// The highest code that can be defined in the CodeBook.
+const int maxCode = (1 << 12) - 1;
 
-/**
- * A CodeBook contains codes defined during LZW compression. It's a mapping from a string
- * of pixels to the code that represents it. The codes are stored in a trie which is
- * represented as a map. Codes may be up to 12 bits. The size of the codebook is always
- * the minimum power of 2 needed to represent all the codes and automatically increases
- * as new codes are defined.
- */
+/// A CodeBook contains codes defined during LZW compression. It's a mapping from a string
+/// of pixels to the code that represents it. The codes are stored in a trie which is
+/// represented as a map. Codes may be up to 12 bits. The size of the codebook is always
+/// the minimum power of 2 needed to represent all the codes and automatically increases
+/// as new codes are defined.
 class CodeBook {
   int colorBits;
-  // The "clear" code which resets the table.
+
+  ///  The "clear" code which resets the table.
   int clearCode;
-  // The "end of data" code.
+
+  ///  The "end of data" code.
   int endCode;
 
   // A mapping from (c1, pixel) -> c2 that returns the new code for the pixel string
@@ -53,15 +49,15 @@ class CodeBook {
   // forming a 20-bit number.
   Map<int, int> _codeAfterAppend;
 
-  // Codes from this value and above are not yet defined.
+  /// Codes from this value and above are not yet defined.
   int nextUnused;
-  
-  // The number of bits required to represent every code.
+
+  ///  The number of bits required to represent every code.
   int bitsPerCode;
-  
-  // The current size of the codebook.
+
+  /// The current size of the codebook.
   int size;
-  
+
   CodeBook(this.colorBits) {
     if (colorBits < 2) {
       colorBits = 2;
@@ -71,26 +67,21 @@ class CodeBook {
     endCode = clearCode + 1;
     clear();
   }
-  
+
   void clear() {
-    _codeAfterAppend = new Map<int, int>();
+    _codeAfterAppend = <int, int>{};
     nextUnused = endCode + 1;
     bitsPerCode = colorBits + 1;
     size = 1 << bitsPerCode;
   }
-  
-  /**
-   * Returns the new code after appending a pixel to the pixel string represented by the previous code,
-   * or null if the code isn't in the table.
-   */
-  int codeAfterAppend(int code, int pixelIndex) {
-   return _codeAfterAppend[(code << 8) | pixelIndex];
-  }
 
-  /**
-   * Defines a new code to be the pixel string of a previous code with one pixel appended.
-   * Returns true if defined, or false if there's no more room in the table.
-   */
+  /// Returns the new code after appending a pixel to the pixel string represented by the previous code,
+  /// or null if the code isn't in the table.
+  int codeAfterAppend(int code, int pixelIndex) =>
+      _codeAfterAppend[(code << 8) | pixelIndex];
+
+  /// Defines a new code to be the pixel string of a previous code with one pixel appended.
+  /// Returns true if defined, or false if there's no more room in the table.
   bool define(int code, int pixelIndex) {
     if (nextUnused == maxCode) {
       return false;
@@ -107,14 +98,16 @@ class CodeBook {
 /// Writes a sequence of integers using a variable number of bits, for LZW compression.
 class CodeBuffer {
   final CodeBook book;
-  final finishedBytes = new List<int>();
-  // A buffer containing bits not yet added to finishedBytes.
+  final List<int> finishedBytes = <int>[];
+
+  /// A buffer containing bits not yet added to finishedBytes.
   int buf = 0;
-  // Number of bits in the buffer.
+
+  /// Number of bits in the buffer.
   int bits = 0;
 
   CodeBuffer(this.book);
-  
+
   void add(int code) {
     assert(code >= 0 && code < book.size);
     buf |= (code << bits);
@@ -125,27 +118,27 @@ class CodeBuffer {
       bits -= 8;
     }
   }
-  
+
   List<int> finish() {
     // Add the remaining bits. (Unused bits are set to zero.)
     if (bits > 0) {
       finishedBytes.add(buf);
     }
-    
+
     // The final result starts withe the number of color bits.
-    final dest = new List<int>();
-    dest.add(book.colorBits);
+    final dest = <int>[]..add(book.colorBits);
 
     // Divide it up into blocks with a size in front of each block.
-    int len = finishedBytes.length;
-    for (int i = 0; i < len;) {
+    for (int i = 0, len = finishedBytes.length; i < len;) {
       if (len - i >= 255) {
-        dest.add(255);
-        dest.addAll(finishedBytes.sublist(i, i + 255));
+        dest
+          ..add(255)
+          ..addAll(finishedBytes.sublist(i, i + 255));
         i += 255;
       } else {
-        dest.add(len - i);
-        dest.addAll(finishedBytes.sublist(i, len));
+        dest
+          ..add(len - i)
+          ..addAll(finishedBytes.sublist(i, len));
         i = len;
       }
     }
