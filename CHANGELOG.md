@@ -1,5 +1,9 @@
 # Changelog
 
-## 0.3.0
+## 1.0
 
-- Dart 2 support & general tidy up
+- Supports and requires Dart 2 (no API change)
+
+## 0.2.3
+
+- Stable version for Dart 1
